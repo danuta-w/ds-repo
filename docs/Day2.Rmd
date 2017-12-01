@@ -1,0 +1,126 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+## Example datasets
+```{r airp data}
+AirPassengers
+```
+
+```{r mpg data}
+mpg
+```
+```{r wide data}
+## wide format
+gap_wide <- readr::read_csv('https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/gapminder_wide.csv')
+
+## yesterdays data format
+gapminder <- readr::read_csv('https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/gapminder.csv')
+
+head(gap_wide)
+head(gapminder)
+
+```
+
+## Use gather to turn gap_wide into a long dataset
+```{r gathering}
+gap_long <- gap_wide %>% 
+  gather(key=obstype_year, 
+         value=obs_values,
+         dplyr::starts_with("pop"),
+         dplyr::starts_with("lifeExp"),
+         dplyr::starts_with("gdpPercap"))
+
+head(gap_long)
+```
+## keep columns with '-' in gather()
+```{r gathering2}
+gap_long <- gap_wide %>% 
+  gather(key=obstype_year, 
+         value=obs_values,
+         -continent, -country)
+
+head(gap_long)
+```
+
+## separate out year
+```{r separating}
+gap_long <- gap_wide %>% 
+  gather(key=obstype_year, 
+         value=obs_values,
+         -continent, -country) %>% 
+  separate(obstype_year,
+           into = c("obs_type","year"),
+           sep = "_",
+           convert = T) # to convert 'year' from character to integer
+head(gap_long)
+
+
+```
+
+## plot long format data
+```{r plotting}
+life_df <- gap_long %>% 
+  filter(obs_type == "lifeExp",
+         continent == "Americas")
+
+head(life_df)
+
+ggplot(data = life_df, aes(x = year, y = obs_values, color = country)) +
+  geom_line()
+```
+
+## Exercise 7.7
+```{r life expectancy}
+gap_long %>% 
+  group_by(continent, obs_type) %>% 
+  summarise(means = mean(obs_values)) %>% 
+  filter(obs_type=="lifeExp")
+
+cont <- gap_long %>% 
+    filter(obs_type=="lifeExp",
+         year >= 1982, 
+         year <= 2007) %>% 
+  group_by(continent,year, obs_type) %>% 
+  summarise(mean_le = mean(obs_values))
+  
+ 
+head(cont) 
+ggplot(data = cont, aes(x = year, y = mean_le, color = continent)) +
+  geom_line()
+labs(title = "Mean life expectancy",
+       x = "Year",
+       y = "Age (years)") 
+
+## Additional customization
+ggplot(data = cont, aes(x = year, y = mean_le, color = continent)) + 
+  geom_line() +
+  labs(title = "Mean life expectancy",
+       x = "Year",
+       y = "Age (years)",
+       color = "Continent") +
+  theme_classic() +
+  scale_fill_brewer(palette = "Blues")  
+
+```
+
+## using spread()
+```{r spreading}
+head(gap_long)
+gap_normal <- gap_long %>% 
+  spread(key = obs_type,
+         value = obs_values)
+head(gap_normal)
+```
+
+
+

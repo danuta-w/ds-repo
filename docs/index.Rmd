@@ -243,4 +243,32 @@ gapminder %>%
   arrange(max_gdpPercap) # if you wanted descending order, arrange(desc(max_gdpPercap))
 
 ```
+## joining datasets
+```{r joining datasets}
+co2 <- read_csv("https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/co2.csv")
+
+co2 %>% head()
+co2 %>% str()
+
+## create new variable with only gapminder 2007 data
+gap_2007 <- gapminder %>% 
+  filter(year == 2007)
+
+gap_2007 %>% head()
+gap_2007 %>% str() # 142 rows
+
+## left_join gap_2007 to co2
+lj <- left_join(gap_2007, co2, by = "country")
+lj %>% dim()
+lj %>% View() # 142 rows
+
+
+## right_join gap_2007 to co2
+rj <- right_join(gap_2007,co2)
+rj %>% dim() # 12 rows
+
+rj %>% View() # or View(rj)
+
+```
+
 
