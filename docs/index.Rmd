@@ -4,7 +4,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 library(tidyverse)
 ```
 
@@ -115,3 +115,132 @@ geom_point()+
   theme(text = element_text(size = 16))
 
 ```
+
+## Elliot's plot
+
+```{r elliot}
+theme_set(theme_gray() + theme(legend.key=element_blank()))
+theme_set(theme_bw() + theme(legend.key=element_blank()))
+
+g <- ggplot(data = mpg, aes(x=cty,y=displ))+ 
+geom_point(alpha=0.3,aes(size=class,color=hwy>20))+
+  geom_smooth()+
+  labs(title = "Relationship b/w engine size & MPG", x = "highway MPG", y = "Engine displacement (litres)")
+g
+
+```
+
+## Data Wrangling with 'dplyr'
+
+```{r test, eval=TRUE}
+
+gapminder <- readr::read_csv("https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/gapminder.csv")
+
+
+```
+
+
+```{r data wrangling}
+# library(tidyverse)
+
+gapminder <- readr::read_csv("https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/gapminder.csv")
+# read_csv is from the readr package (part of the tidyverse). It is not the read.csv, which is part of base R.
+
+gapminder
+
+## useful functions to get to know your data
+head(gapminder) # show the first 6 rows of the data
+tail(gapminder) # show the last 6 rows of the data
+
+head(gapminder, 30) # show the first 30 rows of the data
+
+str(gapminder) # check out the structure of gapminder
+
+names(gapminder) # column names
+
+dim(gapminder) # dimensions
+ncol(gapminder)
+nrow(gapminder)
+
+c(nrow(gapminder),ncol(gapminder)) # combine
+
+summary(gapminder)
+
+# for everything above, we were operating on the whole gapminder dataset
+
+head(gapminder$lifeExp)
+
+filter(gapminder, lifeExp<29)
+
+filter(gapminder, country == "Mexico")
+
+mean(filter(gapminder, country == "Sweden")$lifeExp)
+
+## pipe operator %>%
+
+gapminder %>% head()
+
+gapminder %>% head(3)  # same as head(gapminder,3)
+
+## let's use the %>% with our Sweden example
+y <- gapminder %>% 
+  filter(country=="Sweden") %>% 
+  summarize(mean_lifeExp = mean(lifeExp)) # within the summarize you add column names
+y
+
+gapminder %>%
+  filter(country == "Mexico", year == 2002)
+
+gapminder %>% 
+  filter(country == "Cambodia") %>% 
+  select(-continent, -lifeExp)
+
+gapminder %>%
+  mutate(gdp = pop * gdpPercap)
+
+gapminder %>% 
+  mutate(gdp = pop * gdpPercap) %>% 
+  mutate(index = 1:nrow(gapminder)) 
+
+
+# let's add an index
+gapminder %>% 
+  mutate(gdp = pop * gdpPercap, index = 1:nrow(gapminder)) 
+
+# not the right way, shouldn't work (only returns half)
+gapminder %>% 
+  filter(country == c("Egypt","Vietnam"))
+
+## %in% operator lets you filter multiple things within a c()
+gapminder %>% 
+  filter(country %in% c("Egypt","Vietnam"))
+
+gapminder %>% 
+  filter(country %in% c("Egypt","Vietnam")) %>% 
+  mutate(maxgdp = max(gdpPercap)) 
+
+## group_by() so that we can get 2 axes
+gapminder %>% 
+  filter(country %in% c("Egypt","Vietnam")) %>% 
+  group_by(country) %>% 
+  summarize(max_gdpPercap = max(gdpPercap)) # or:
+  # mutate(max_gdpPercap = max(gdpPercap))
+
+gapminder %>% 
+  group_by(country) %>% 
+  summarize(max_gdpPercap = max(gdpPercap))
+
+# let's keep the year associated with that max_gdpPercap
+gapminder %>% 
+  group_by(country) %>% 
+  filter(gdpPercap == max(gdpPercap)) 
+  # mutate(max_gdpPercap = max(gdpPercap)) %>% 
+
+gapminder %>% 
+  group_by(country) %>% 
+  mutate(max_gdpPercap = max(gdpPercap)) %>%
+  filter(max_gdpPercap == gdpPercap) %>% 
+  arrange(max_gdpPercap) # if you wanted descending order, arrange(desc(max_gdpPercap))
+
+```
+
