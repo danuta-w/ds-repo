@@ -1,6 +1,14 @@
 ---
-title: "Untitled"
-output: html_document
+title: "Day2"
+date: "December 1, 2017"
+output: 
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+
+
+  
 ---
 
 ```{r setup, include=FALSE}
